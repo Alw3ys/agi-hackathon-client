@@ -12,8 +12,8 @@ import {
 import moment from "moment";
 
 type ChatResponse = {
-  text: string;
-  payload?: TrendableValue[];
+  answer: string;
+  data?: TrendableValue[];
 };
 
 type TrendableValue = {
@@ -71,50 +71,35 @@ const Chat: React.FC<any> = ({
     // Assume the function sendMessageToServer exists and updates the response
     // await sendMessageToServer(message).then(res => setResponse(res));
 
-    const newResponse: ChatResponse = {
-      text: "Here is the graph for the patients heart rate. ",
-      payload: [
+    try {
+      console.log("Sending message:", message);
+      const response = await fetch(
+        `http://127.0.0.1:8000/chat?question=${message}`,
         {
-          timestamp: "2023-10-07T00:00:00",
-          value: 70,
-          unit: "bpm",
-        },
-        {
-          timestamp: "2023-10-07T00:05:00",
-          value: 75,
-          unit: "bpm",
-        },
-        {
-          timestamp: "2023-10-07T00:10:00",
-          value: 80,
-          unit: "bpm",
-        },
-        {
-          timestamp: "2023-10-07T00:15:00",
-          value: 85,
-          unit: "bpm",
-        },
-        {
-          timestamp: "2023-10-07T00:20:00",
-          value: 90,
-          unit: "bpm",
-        },
-        {
-          timestamp: "2023-10-07T00:25:00",
-          value: 95,
-          unit: "bpm",
-        },
-        {
-          timestamp: "2023-10-07T00:30:00",
-          value: 100,
-          unit: "bpm",
-        },
-      ],
-    };
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      if (!response.ok) {
+        console.error("Response not ok:", response);
+        throw new Error("Network response was not ok");
+      }
 
-    setResponses((prevResponses) => [...prevResponses, newResponse]); // Append new response to existing list
+      const data = await response.json();
+      console.log("Received data:", data);
+
+      setResponses((prev) => [...prev, data]);
+
+      // ... handle the data ...
+    } catch (error) {
+      console.error("Error sending message:", error);
+    } finally {
+      setIsLoading(false);
+    }
+
     setIsLoading(false);
   };
 
@@ -151,8 +136,8 @@ const Chat: React.FC<any> = ({
       <div className="mt-16 mb-16 overflow-y-auto p-4" ref={graphContainerRef}>
         {responses.map((res, index) => (
           <div key={index} className="bg-white p-4 mb-4 rounded-lg shadow-md">
-            <p className="my-4">{res.text}</p>
-            {res.payload && res.payload.length > 0 && (
+            <p className="my-4">{res.answer}</p>
+            {res.data && res.data.length > 0 && (
               <table className="min-w-full bg-white rounded-lg shadow-md text-gray-800 border-collapse border border-gray-300">
                 <thead className="bg-gray-100">
                   <tr>
@@ -168,7 +153,7 @@ const Chat: React.FC<any> = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {res.payload.slice(0, 10).map((item, idx) => (
+                  {res.data.slice(0, 10).map((item, idx) => (
                     <tr
                       key={idx}
                       className={`${idx % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
@@ -187,7 +172,7 @@ const Chat: React.FC<any> = ({
                 </tbody>
               </table>
             )}
-            {res.payload && res.payload.length > 2 && (
+            {res.data && res.data.length > 2 && (
               <button
                 onClick={() => toggleGraph(index)}
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
@@ -197,7 +182,7 @@ const Chat: React.FC<any> = ({
             )}
             {showGraphFor.includes(index) && (
               <div className="graph-section">
-                {renderLineChart(res.payload || [])}
+                {renderLineChart(res.data || [])}
               </div>
             )}
           </div>
@@ -207,12 +192,22 @@ const Chat: React.FC<any> = ({
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault(); // Prevents the default behavior of adding a new line
+              handleSendMessage(); // Function to send the message
+              setMessage(""); // Clears the textarea
+            }
+          }}
           className="flex-grow rounded-lg p-2 border border-gray-300 mr-2 resize-none"
           placeholder="Type your message"
         />
         <button
-          onClick={handleSendMessage}
-          className={` bg-blue-500 text-white rounded-lg px-4 py-2 relative ${
+          onClick={() => {
+            handleSendMessage();
+            setMessage("");
+          }}
+          className={`bg-blue-500 text-white rounded-lg px-4 py-2 relative ${
             isLoading ? "opacity-50" : "opacity-100"
           }`}
         >

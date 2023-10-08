@@ -17,7 +17,7 @@ const PatientSelectionScreen: React.FC<any> = ({
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const res = await fetch(`https://agihouse-medical.deployplex.app/patients`, {
+        const res = await fetch(`http://127.0.0.1:8000/patients`, {
           method: 'GET',
         })
 

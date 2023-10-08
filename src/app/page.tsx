@@ -27,15 +27,10 @@ export default function Home() {
   const goBack = () => {
     setPatient(null)
   }
-
-  // TODO: comment out
-  useEffect(() => {
-    setPatient({id: "123", name:"John Doe"})
-  }, [])
-
+  
   return (
     <QueryClientProvider client={queryClient}>
-      {/* {!patient && <PatientSelectionScreen onSelectPatient={onSelectPatient} />} */}
+      {!patient && <PatientSelectionScreen onSelectPatient={onSelectPatient} />}
       {patient && <Chat patient={patient} goBack={goBack} />}
     </QueryClientProvider>
   );
