@@ -14,12 +14,34 @@ const Chat: React.FC<any> = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSendMessage = async () => {
-    setIsLoading(true);
-    // Logic to send message to server
-    // Assume the function sendMessageToServer exists and updates the response
-    // await sendMessageToServer(message).then(res => setResponse(res));
-    // setIsLoading(false);
+      setIsLoading(true);
+
+      try {
+          console.log('Sending message:', message);
+          const response = await fetch(`http://127.0.0.1:8000/chat?question=${message}`, {
+              method: 'GET',
+              headers: {
+                  'Accept': 'application/json'
+              }
+          });
+
+          if (!response.ok) {
+              console.error('Response not ok:', response);
+              throw new Error('Network response was not ok');
+          }
+
+          const data = await response.json();
+          console.log('Received data:', data);
+
+          // ... handle the data ...
+      } catch (error) {
+          console.error('Error sending message:', error);
+          setResponse("Error connecting to the server.");
+      } finally {
+          setIsLoading(false);
+      }
   };
+
 
   return (
     <div className="w-screen h-screen flex flex-col bg-gray-100">
