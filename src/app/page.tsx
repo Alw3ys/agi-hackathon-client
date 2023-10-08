@@ -5,7 +5,7 @@ import {
   QueryClientProvider,
   useQuery
 } from '@tanstack/react-query';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import HomeScreen from './components/Chat';
 import PatientSelectionScreen from './components/PatientSelectionScreen';
 import Chat from './components/Chat';
@@ -28,9 +28,14 @@ export default function Home() {
     setPatient(null)
   }
 
+  // TODO: comment out
+  useEffect(() => {
+    setPatient({id: "123", name:"John Doe"})
+  }, [])
+
   return (
     <QueryClientProvider client={queryClient}>
-      {!patient && <PatientSelectionScreen onSelectPatient={onSelectPatient} />}
+      {/* {!patient && <PatientSelectionScreen onSelectPatient={onSelectPatient} />} */}
       {patient && <Chat patient={patient} goBack={goBack} />}
     </QueryClientProvider>
   );

@@ -17,16 +17,18 @@ const PatientSelectionScreen: React.FC<any> = ({
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        // ...
-        const data = {
-          patients: [
-            { id: "1234", name: "John Doe" },
-            { id: "1234123112", name: "Jane asdkasd" },
-            { id: "12321", name: "Felipe aaa" },
-          ],
-        };
-        // ...
-        setPatients(data.patients);
+        const res = await fetch(`https://agihouse-medical.deployplex.app/patients`, {
+          method: 'GET',
+        })
+
+        const patients = (await res.json()).map((patient: any) => ({
+          id: patient.user_id,
+          name: patient.user_name,
+        }))
+
+        console.log("patients", patients)
+
+        setPatients(patients);
       } catch (error) {
         console.error(
           "There has been a problem with your fetch operation:",
